@@ -1,0 +1,61 @@
+--======================
+--方法1
+--======================
+
+WITH CTE AS (
+SELECT A.Id,A.[Uid],UserName FROM (
+SELECT A.[id], REPLACE(Split.a.value('.', 'NVARCHAR(max)'),'''','') AS [Uid]
+FROM 
+(
+SELECT [id], CAST ('<M>' + REPLACE(Uid, ',', '</M><M>') + '</M>' AS XML) AS [Uid] FROM A
+) AS A CROSS APPLY [Uid].nodes ('/M') AS Split(a)
+
+) A INNER JOIN dbo.B B ON A.[Uid]=B.[Uid]
+)
+SELECT DISTINCT classList=stuff((select ',' +UserName from CTE B WHERE A.Id=B.Id for xml path('')),1,1,'') FROM CTE A
+
+--======================
+--方法2
+--======================
+
+SELECT t.id,classList=STUFF((
+SELECT ','+tt1.UserName 
+FROM A tt left join B tt1 ON ''+tt.Uid+',' like '%'+tt1.Uid+',%' 
+WHERE tt.id=t.id FOR XML PATH('')),1,1,'')
+FROM A t 
+ORDER BY t.id
+
+--======================
+--方法3
+--======================
+
+select id, (select UserName from B where Uid=t02.item) c into #ttt from dbo.A as t01 cross apply dbo.split(t01.Uid,',') as t02
+
+select id,stuff((select ','+c from dbo.#ttt as tb01 where tb01.id=tb02.id for xml path('')),1,1,'') as classList
+
+from dbo.#ttt as tb02 group by id
+
+drop table #ttt
+
+
+create function split(
+@string varchar(255),
+@separator varchar(255)
+)returns @array table(item varchar(255))
+as
+begin
+declare @begin int,@end int,@item varchar(255)
+set @begin = 1
+set @end=charindex(@separator,@string,@begin)
+while(@end<>0)
+begin
+set @item = substring(@string,@begin,@end-@begin)
+insert into @array(item) values(@item)
+set @begin = @end+1
+set @end=charindex(@separator,@string,@begin)
+end
+set @item = substring(@string,@begin,len(@string)+1-@begin)
+if (len(@item)>0)
+insert into @array(item) values(substring(@string,@begin,len(@string)+1-@begin))
+return
+end
