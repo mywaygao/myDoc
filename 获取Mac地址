@@ -1,0 +1,7 @@
+DECLARE @dbid INT;
+SET @dbid = DB_ID(<DBName>);   
+ 
+SELECT  DISTINCT
+        hostname , DB_NAME(dbid) , net_address , loginame
+FROM    master..sysprocesses
+WHERE   hostname<>'' AND ( @dbid IS NULL OR dbid=@dbid );   
