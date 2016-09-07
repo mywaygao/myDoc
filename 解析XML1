@@ -1,0 +1,55 @@
+--================================
+--解析XML
+--=================================
+
+DECLARE @xml XML=
+N'
+<interface success="1">
+<leave>
+<lv_employee_no></lv_employee_no>
+<lv_leave_code>事假</lv_leave_code>
+<lv_leave_unit>D</lv_leave_unit>
+<lv_start_datetime>2016-08-11 00:00:00</lv_start_datetime>
+<lv_end_datetime>2016-08-26 00:00:00</lv_end_datetime>
+<lv_duration>12.0</lv_duration>
+<lv_posting_date>2016-08-11 00:00:00</lv_posting_date>
+<lv_tran_date>2016-08-02</lv_tran_date>
+<lv_event_date>2016-08-02 16:28:35</lv_event_date>
+<lv_attachment></lv_attachment>
+<lv_remark></lv_remark>
+<lv_is_posted_to_payroll>0</lv_is_posted_to_payroll>
+<lv_is_cancel>0</lv_is_cancel>
+</leave>
+<leave>
+<lv_employee_no></lv_employee_no>
+<lv_leave_code>事假1</lv_leave_code>
+<lv_leave_unit>D</lv_leave_unit>
+<lv_start_datetime>2016-08-12 00:00:00</lv_start_datetime>
+<lv_end_datetime>2016-08-26 00:00:00</lv_end_datetime>
+<lv_duration>12.0</lv_duration>
+<lv_posting_date>2016-08-11 00:00:00</lv_posting_date>
+<lv_tran_date>2016-08-02</lv_tran_date>
+<lv_event_date>2016-08-02 16:28:35</lv_event_date>
+<lv_attachment></lv_attachment>
+<lv_remark></lv_remark>
+<lv_is_posted_to_payroll>0</lv_is_posted_to_payroll>
+<lv_is_cancel>0</lv_is_cancel>
+</leave>
+</interface>
+'
+--DECLARE @success NVARCHAR(10)='success'
+--SELECT @xml.exist('//interface/@*[local-name()=sql:variable("@success")]')
+
+
+SELECT @xml.exist('(/interface[@success="1"])')
+
+--'/root/info/user/@*[local-name()=sql:variable("@attr")]'
+
+
+SELECT 
+
+p.t.value('(./lv_employee_no)[1]','nvarchar(100)') ,p.t.value('(./lv_leave_code)[1]','nvarchar(100)') ,
+
+p.t.value('(./lv_leave_unit)[1]','nvarchar(100)') ,p.t.value('(./lv_start_datetime)[1]','nvarchar(100)') 
+
+FROM  @xml.nodes('/interface/leave') AS P(t)
