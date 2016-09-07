@@ -1,0 +1,4 @@
+DECLARE @ XML =
+'<r><user_id>1</user_id><employee_no>A123451</employee_no><user_name>Ivy</user_name><user_type></user_type><password>7BAC77286B0E3662FC4A5FEEA19BB3F3</password><is_locked>0</is_locked><pw_change_date>2013-03-11T15:20:00.423</pw_change_date><pwd_change_req>0</pwd_change_req><email>gable.gao@cityray.com</email><default_lang>101</default_lang><phone>123456789</phone><is_inherit>0</is_inherit><business_unit_key>CHN</business_unit_key><effect_date>2011-03-29</effect_date><is_active>1</is_active><description>Ivy</description><report_default_pay_term></report_default_pay_term><input_date>2015-06-15T17:37:19.720</input_date><input_user>93</input_user><is_deleted>1</is_deleted><default_home_page></default_home_page><is_admin>0</is_admin><home_page_head_photo>http://192.168.3.96:8888/ihrplus_v6_demo/cb_hrms/views/photos/nophoto.jpg</home_page_head_photo></r>'
+
+SELECT d1.c1.value('(./text())[1]','nvarchar(50)') FROM @.nodes('/r/user_id') AS d1(c1)
