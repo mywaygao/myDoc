@@ -1,0 +1,107 @@
+--=====================
+--解析json  SQL 2016以前
+--======================
+
+
+
+Alter PROCEDURE proc_split_json  @_jsonString NVARCHAR(max)
+AS
+
+
+--exec proc_split_json
+-- N'[{"employee_no":"AC100000","employee_name":"接口测试1"},{"employee_no":"CB222222","employee_name":"接口测试2"},{"employee_no":"AB333333","employee_name":"接口测试3"},{"employee_no":"AB444444","employee_name":"接口测试4"}]'
+-- N'[{"employee_no":"AC100000","employee_name":"接口测试1","employee_status":"A"},{"employee_no":"CB222222","employee_name":"接口测试2","employee_status":"I"}]'
+
+
+
+BEGIN
+
+DECLARE @orginal NVARCHAR(max)=@_jsonString
+
+DECLARE @json NVARCHAR(max)
+SET @json=@orginal
+
+DECLARE @StartRoot NVARCHAR(100);SET @StartRoot='['
+DECLARE @EndRoot NVARCHAR(100);SET @EndRoot=']'
+
+DECLARE @StartRecordIndex INT =0
+DECLARE @endRecordIndex INT =0
+
+DECLARE @StartRecord NVARCHAR(100);SET @StartRecord='{'
+DECLARE @EndRecord NVARCHAR(100);SET @EndRecord='}'
+
+DECLARE @split NVARCHAR(100);SET @split='"'
+DECLARE @record_split NVARCHAR(100);SET @record_split=','
+DECLARE @name  NVARCHAR(max)
+DECLARE @value  NVARCHAR(max)
+DECLARE @sub  NVARCHAR(max)
+DECLARE @result  NVARCHAR(max)
+
+--SET @endRootIndex=CHARINDEX(@EndRoot,@json,0)
+PRINT N'解析JSON开始->'
+
+WHILE @json<>@EndRoot
+BEGIN
+
+	/** 解析json中第一条信息 即第一个{}中数据 */
+
+	DECLARE @input NVARCHAR(max)
+	SET @StartRecordIndex=CHARINDEX(@StartRecord,@json,0)
+	SET @endRecordIndex=CHARINDEX(@EndRecord,@json,0)
+	SET @input=SUBSTRING(@json,@StartRecordIndex,@endRecordIndex-1)
+	
+
+	PRINT N'	*拆解为单条数据：'+@input
+
+		/** 解析第一条信息中不同信息，即,分隔的信息*/
+		DECLARE @inner NVARCHAR(max)=''
+		DECLARE @text NVARCHAR(max)=''
+		DECLARE @index INT DECLARE @end INT
+		SET @inner=@input
+		SET @index =CHARINDEX(@record_split,@inner,0)
+		SET @text=@inner
+
+		WHILE @index>0
+		BEGIN
+			SET @index =CHARINDEX(@record_split,@inner,0)	
+			SET @text=case WHEN @index=0 THEN @inner ELSE SUBSTRING(@inner,0,@index+1) end			
+			PRINT N'		*解析数据：'+@text
+				
+					DECLARE @pos INT DECLARE @pos_end INT 
+					SET @pos =CHARINDEX(@split,@text,0)
+					SET @pos_end =CHARINDEX(@split,@text,@pos+1)
+					--PRINT @pos PRINT @pos_end
+					SET @name=SUBSTRING(@text,@pos+1,@pos_end-@pos-1)
+					--PRINT '					key:'+@name
+					--set @result =@name
+					SET @sub=SUBSTRING(@text,@pos_end+1,LEN(@text)-@pos-1)
+					--PRINT @sub
+					SET @pos =CHARINDEX(@split,@sub,0)
+					SET @pos_end =CHARINDEX(@split,@sub,@pos+1)
+					--PRINT @pos PRINT @End
+					SET @value=SUBSTRING(@sub,@pos+1,@pos_end-@pos-1)
+
+					PRINT N'			*结果：
+					key:'+@name+N'    value:'+@value+N'
+					'
+					/**在这里处理解析后的key和value*/
+
+
+
+					--set @result =@result+':'+@value
+					--PRINT @result
+				
+			SET @inner=SUBSTRING(@inner,@index+1,LEN(@inner)-@index+1)			
+
+		end
+	
+
+	SET @json=SUBSTRING(@json,@endRecordIndex+1,LEN(@orginal)-@endRecordIndex+1)
+
+	--PRINT @json
+
+END 
+
+PRINT N'解析JSON完成<-'
+
+end
