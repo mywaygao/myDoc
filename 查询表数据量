@@ -1,0 +1,11 @@
+SELECT  o.name , ddps.row_count
+FROM    sys.indexes AS i
+INNER JOIN sys.objects AS o ON i.object_id=o.object_id
+INNER JOIN sys.dm_db_partition_stats AS ddps ON i.object_id=ddps.object_id AND i.index_id=ddps.index_id
+WHERE   i.index_id<2 AND o.is_ms_shipped=0 AND o.name IN ( SELECT   name
+                                                           FROM     sys.objects
+                                                           WHERE    type='U' )
+ORDER BY ddps.row_count DESC;
+
+
+
