@@ -1,0 +1,38 @@
+;WITH    x0
+          AS ( SELECT   1 AS id ,
+                        '001,002' AS ty
+               UNION ALL
+               SELECT   2 AS id ,
+                        '003' AS ty
+               UNION ALL
+               SELECT   3 AS id ,
+                        '004,1234' AS ty
+               UNION ALL
+               SELECT   4 AS id ,
+                        '01,005,006' AS ty
+             ),
+        x1 ( id, ty1, ty2 )
+          AS ( SELECT   id ,
+                        CASE WHEN CHARINDEX(',', ty, 1) > 0
+                             THEN CONVERT(VARCHAR(10), LEFT(ty,
+                                                            CHARINDEX(',', ty,
+                                                              1) - 1))
+                             ELSE ty
+                        END AS ty1 ,--本次拆分字符
+                        CASE WHEN CHARINDEX(',', ty, 1) > 0 THEN 
+                             STUFF(ty + ',', 1, CHARINDEX(',', ty), '')
+                             ELSE NULL
+                        END AS ty2--待拆分字符串
+               FROM     x0
+               UNION ALL
+               SELECT   id ,
+                        CONVERT(VARCHAR(10), LEFT(ty2,
+                                                  NULLIF(CHARINDEX(',', ty2, 1),
+                                                         0) - 1)) AS ty1 ,--本次拆分字符
+                        STUFF(ty2, 1, CHARINDEX(',', ty2), '') AS ty2--待拆分字符串
+               FROM     x1
+               WHERE    CHARINDEX(',', ty2, 1) > 0
+             )
+    SELECT  id,ty1 AS ty
+    FROM    x1 ORDER BY id
+
