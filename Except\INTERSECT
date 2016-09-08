@@ -1,0 +1,19 @@
+--==================
+--取差异
+--==================
+
+SELECT TOP 4 * FROM HR_EMPLOYEE_POSITION 
+
+Except 
+
+SELECT TOP 2 * FROM HR_EMPLOYEE_POSITION 
+
+--==================
+--取相同
+--==================
+
+SELECT TOP 4 * FROM HR_EMPLOYEE_POSITION 
+
+INTERSECT
+
+SELECT TOP 2 * FROM HR_EMPLOYEE_POSITION 
