@@ -1,0 +1,119 @@
+--==============================
+--设置链接库
+--==============================
+
+-- 设置变量  
+declare @linkedServerName sysname = 'TempExcelSpreadsheet' 
+declare @excelFileUrl nvarchar(1000) = 'C:\Users\Administrator\Desktop\a.xls' 
+-- /SET  
+   
+-- 删除链接服务（如果它已经存在）  
+if exists(select null from sys.servers where name = @linkedServerName) begin 
+    exec sp_dropserver @server = @linkedServerName, @droplogins = 'droplogins' 
+end 
+   
+-- 添加服务对象  
+-- ACE 12.0 可以很好地工作为*.xls 和 *.xlsx, 你也可以用 Jet ,但是只能访问*.xls文件  
+exec sp_addlinkedserver  
+    @server = @linkedServerName,  
+    @srvproduct = 'ACE 12.0',  
+    @provider = 'Microsoft.ACE.OLEDB.12.0',  
+    @datasrc = @excelFileUrl,  
+    @provstr = 'Excel 12.0;HDR=Yes' 
+   
+-- 获取当前用户  
+declare @suser_sname nvarchar(256) = suser_sname()  
+   
+-- 添加当前用户作为登陆这个链接服务  
+exec sp_addlinkedsrvlogin  
+    @rmtsrvname = @linkedServerName,  
+    @useself = 'false',  
+    @locallogin = @suser_sname,  
+    @rmtuser = null,  
+    @rmtpassword = null 
+   
+-- 返回 sheet 和 各个 sheet中的列  
+
+exec sp_tables_ex @linkedServerName  
+--exec sp_columns_ex @linkedServerName  
+
+--==============================
+--解析简历
+--==============================
+Create table #s(a nvarchar(100),b nvarchar(100),c nvarchar(100),d nvarchar(100),e nvarchar(100))
+insert into #s
+exec sp_tables_ex TempExcelSpreadsheet
+declare @ int =1,@num int,@sql nvarchar(max),@sheet_name nvarchar(1000)
+select @num=COUNT(1) from #s where  c not like '%UserList%'
+while @<=@num
+begin
+	set @sql='' set @sheet_name=''
+	select @sheet_name=replace(c,'''','') from 
+	(
+	select ROW_NUMBER()over(order by c)as r,c from #s 
+	)as fi
+	where r=@ and c not like '%UserList%'
+	
+	set @sql='select [个人简历] as a,[F3] as b,'''+ @sheet_name+''' as sheet_name from OpenRowSet(''Microsoft.ACE.OLEDB.12.0''
+, ''Excel 12.0;HDR=Yes;IMEX=1;Database=C:\Users\Administrator\Desktop\a.xls''
+, ''select * from ['+@sheet_name+']'')'
+	--print @sheet_name 
+	--print @sql
+	--exec (@sql)
+	set @sql='with ba as ('+@sql+' where len([个人简历])>0)'
+	+
+	'select * from ba
+	pivot (
+	max(b) for a in (
+	[姓名],
+	[培训经历],
+	[其他信息],
+	[到岗时间],
+	[高级人才附加信息],
+	[求职状态],
+	[期望工资],
+	[应聘职位],
+	[证书],
+	[户口],
+	[目前年薪],
+	[公司电话],
+	[求职信],
+	[目标地点],
+	[更新日期],
+	[语言能力],
+	[目前居住地],
+	[所获奖励],
+	[求职意向],
+	[移动电话],
+	[邮编],
+	[IT技能],
+	[希望行业],
+	[电子邮件],
+	[匹配度],
+	[地址],
+	[应聘公司/部门],
+	[简历评语],
+	[家庭电话],
+	[个人主页],
+	[项目经验],
+	[个人基本信息],
+	[身高],
+	[工作经验],
+	[出生日期],
+	[简历关键字],
+	[工作年限],
+	[教育经历],
+	[自我评价],
+	[政治面貌],
+	[性别],
+	[工作性质],
+	[社会实践],
+	[婚姻状况],
+	[目标职能]
+	) 
+
+	)as pt
+	'
+	exec (@sql)
+set @+=1
+end
