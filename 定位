@@ -1,0 +1,4 @@
+--CHARINDEX 第一次出现，PATINDEX最后一次出现
+
+SELECT CHARINDEX(' ', 'xiong er 1'), PATINDEX('%[1-9]', 'test1')
+ 
