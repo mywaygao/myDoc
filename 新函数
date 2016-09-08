@@ -1,2 +1,12 @@
-
+--CHOOSE
 SELECT CHOOSE ( 3, 'A', 'B' , 'C', 'D' )
+
+--EOMONTH
+SELECT EOMONTH(GETDATE())
+
+--CONCAT
+SELECT CONCAT ( 'zifu ', '123 ' , 11 )
+
+--FORMAT
+SELECT FORMAT ( GETDATE()  , 'D', 'en-US' )
+SELECT FORMAT (123.456, '0.00' )
