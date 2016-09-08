@@ -1,0 +1,41 @@
+--============================
+--开窗 Range 包含和当前行有相同ORDER BY值的汇总。
+--============================
+
+SELECT
+    t.OrderYear,
+    t.OrderMonth,
+
+    count(t.employee_no) OVER(ORDER BY t.OrderYear, t.OrderMonth RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS 'Total'
+FROM
+(
+    SELECT
+        YEAR(pay_period) AS 'OrderYear',
+        MONTH(pay_period) AS 'OrderMonth',
+        employee_no,
+        fig1
+    FROM dbo.HR_PAY_RESULT 
+) AS t
+WHERE
+   
+     t.OrderYear = 2015
+
+--============================
+--开窗 Rows  自增长的汇总
+--============================
+ SELECT
+    t.OrderYear,
+    t.OrderMonth,
+    count(t.employee_no) OVER(ORDER BY t.OrderYear, t.OrderMonth ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS 'RunningTotal'
+FROM
+(
+     SELECT
+        YEAR(pay_period) AS 'OrderYear',
+        MONTH(pay_period) AS 'OrderMonth',
+        employee_no,
+        fig1
+    FROM dbo.HR_PAY_RESULT 
+) AS t
+WHERE
+
+    t.OrderYear = 2015
