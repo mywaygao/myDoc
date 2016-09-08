@@ -1,0 +1,4 @@
+--取第一个不为null的
+
+SELECT  COALESCE(NULL, NULL, GETDATE()) 
+
