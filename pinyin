@@ -1,0 +1,49 @@
+ Create  function  fn_GetPy(@str  nvarchar(4000))  
+  returns  nvarchar(4000)  
+　--用于加密
+  --WITH  ENCRYPTION  
+  as  
+  begin  
+  declare  @intLen int  
+  declare  @strRet nvarchar(4000)  
+  declare  @temp  nvarchar(100)  
+  set  @intLen  =  len(@str)  
+  set  @strRet  =  ''  
+  while  @intLen  >  0  
+  begin  
+  set  @temp  =  ''  
+  select  @temp  =  case    
+  when  substring(@str,@intLen,1)  >=  '帀'  then  'Z'  
+  when  substring(@str,@intLen,1)  >=  '丫'  then  'Y'  
+  when  substring(@str,@intLen,1)  >=  '夕'  then  'X'  
+  when  substring(@str,@intLen,1)  >=  '屲'  then  'W'  
+  when  substring(@str,@intLen,1)  >=  '他'  then  'T'  
+  when  substring(@str,@intLen,1)  >=  '仨'  then  'S'  
+  when  substring(@str,@intLen,1)  >=  '呥'  then  'R'  
+  when  substring(@str,@intLen,1)  >=  '七'  then  'Q'  
+  when  substring(@str,@intLen,1)  >=  '妑'  then  'P'  
+  when  substring(@str,@intLen,1)  >=  '噢'  then  'O'  
+  when  substring(@str,@intLen,1)  >=  '拏'  then  'N'  
+  when  substring(@str,@intLen,1)  >=  '嘸'  then  'M'  
+  when  substring(@str,@intLen,1)  >=  '垃'  then  'L'  
+  when  substring(@str,@intLen,1)  >=  '咔'  then  'K'  
+  when  substring(@str,@intLen,1)  >=  '丌'  then   'J'  
+  when  substring(@str,@intLen,1)  >=  '铪'  then  'H'  
+  when  substring(@str,@intLen,1)  >=  '旮'  then  'G'  
+  when  substring(@str,@intLen,1)  >=  '发'  then  'F'  
+  when  substring(@str,@intLen,1)  >=  '妸'  then  'E'  
+  when  substring(@str,@intLen,1)  >=  '咑'  then  'D'  
+  when  substring(@str,@intLen,1)  >=  '嚓'  then  'C'  
+  when  substring(@str,@intLen,1)  >=  '八'  then  'B'  
+  when  substring(@str,@intLen,1)  >=  '吖'  then  'A'  
+  else  rtrim(ltrim(substring(@str,@intLen,1)))  
+  end  
+  --对于汉字特殊字符，不生成拼音码  
+  if  (ascii(@temp)>127)  set  @temp  =  ''  
+  --对于英文中小括号，不生成拼音码  
+  if  @temp  =  '('  or  @temp  =  ')'  set  @temp  =  ''  
+  select  @strRet  =  @temp  +  @strRet  
+  set  @intLen  =  @intLen  -  1  
+  end  
+  return  lower(@strRet)  
+  end 
