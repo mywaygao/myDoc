@@ -1,0 +1,10 @@
+SELECT 
+--position_code,employee_no,
+CASE WHEN GROUPING(employee_no) =1 THEN position_code ELSE '' END AS p,
+CASE WHEN GROUPING(employee_no) =0 THEN employee_no ELSE '' END AS e
+FROM dbo.HR_EMPLOYEE_POSITION
+
+GROUP BY position_code,employee_no WITH ROLLUP
+HAVING GROUPING(position_code)=0
+
+ORDER BY position_code,employee_no
